@@ -27,6 +27,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef MOTOROLA_LOG
+#if HAVE_LIBC_SYSTEM_PROPERTIES
+#include <sys/system_properties.h>
+#endif
+#endif
+
 #include <log/logger.h>
 #include <log/logd.h>
 #include <log/log.h>
@@ -77,6 +83,23 @@ int __android_log_dev_available(void)
 
     return (g_log_status == kLogAvailable);
 }
+
+#ifdef HTCLOG
+signed int __htclog_read_masks(char *buf, signed int len)
+{
+    return 0;
+}
+
+int __htclog_init_mask(const char *a1, unsigned int a2, int a3)
+{
+    return 0;
+}
+
+int __htclog_print_private(int a1, const char *a2, const char *fmt, ...)
+{
+    return 0;
+}
+#endif
 
 #ifdef MOTOROLA_LOG
 /* Fallback when there is neither log.tag.<tag> nor log.tag.DEFAULT.
@@ -246,7 +269,19 @@ int __android_log_write(int prio, const char *tag, const char *msg)
         !strcmp(tag, "STK") ||
         !strcmp(tag, "CDMA") ||
         !strcmp(tag, "PHONE") ||
-        !strcmp(tag, "SMS")) {
+        !strcmp(tag, "SMS") ||
+        !strcmp(tag, "KINETO") ||
+        !strncmp(tag, "KIPC", 4) ||
+        !strncmp(tag, "Kineto", 6) ||
+        !strncmp(tag, "QCRIL", 5) ||
+        !strncmp(tag, "QC-RIL", 6) ||
+        !strncmp(tag, "QC-QMI", 6) ||
+        !strncmp(tag, "QC-ONCRPC", 9) ||
+        !strncmp(tag, "QC-DSI", 6) ||
+        !strcmp(tag, "QC-NETMGR-LIB") ||
+        !strcmp(tag, "QC-QDP") ||
+        !strcmp(tag, "Diag_Lib")
+        ) {
             log_id = LOG_ID_RADIO;
             // Inform third party apps/ril/radio.. to use Rlog or RLOG
             snprintf(tmp_tag, sizeof(tmp_tag), "use-Rlog/RLOG-%s", tag);
@@ -281,7 +316,16 @@ int __android_log_buf_write(int bufID, int prio, const char *tag, const char *ms
         !strcmp(tag, "STK") ||
         !strcmp(tag, "CDMA") ||
         !strcmp(tag, "PHONE") ||
-        !strcmp(tag, "SMS"))) {
+        !strcmp(tag, "SMS") ||
+        !strcmp(tag, "KINETO") ||
+        !strncmp(tag, "KIPC", 4) ||
+        !strncmp(tag, "Kineto", 6) ||
+        !strncmp(tag, "QCRIL", 5) ||
+        !strncmp(tag, "QC-RIL", 6) ||
+        !strncmp(tag, "QC-QMI", 6) ||
+        !strncmp(tag, "QC-ONCRPC", 9) ||
+        !strncmp(tag, "QC-DSI", 6)
+        )) {
             bufID = LOG_ID_RADIO;
             // Inform third party apps/ril/radio.. to use Rlog or RLOG
             snprintf(tmp_tag, sizeof(tmp_tag), "use-Rlog/RLOG-%s", tag);
